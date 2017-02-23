@@ -19,6 +19,7 @@ library
                      , User
                      , Milestone
                      , Task
+                     , Markdown
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , bytestring
