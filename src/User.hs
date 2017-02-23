@@ -11,6 +11,7 @@ import Data.Aeson
 -- instance FromJSON UserState
 type UserState = String
 
+type Users = [User]
 data User = User            { name                  :: String
                             , username              :: String
                             , id                    :: Int
@@ -18,5 +19,5 @@ data User = User            { name                  :: String
                             , avatar_url            :: String
                             , web_url               :: String
                             }
-    deriving (Show, Eq, Generic)
+    deriving (Show, Eq, Ord, Generic)
 instance FromJSON User

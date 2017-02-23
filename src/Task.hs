@@ -9,6 +9,7 @@ import Data.Aeson
 import qualified User as U
 import qualified Milestone as M
 
+type Tasks = [Task]
 data Task = Task            { id                  :: Int
                             , iid                 :: Int
                             , project_id          :: Int
@@ -29,5 +30,7 @@ data Task = Task            { id                  :: Int
                             , confidential        :: Bool
                             , web_url             :: String
                             }
-    deriving (Show, Generic)
+    deriving (Eq, Ord, Generic)
 instance FromJSON Task
+instance Show Task where
+    show x = show $ Task.id x
