@@ -15,6 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
+                     , src/json-parser
   exposed-modules:     Lib
                      , User
                      , Milestone
