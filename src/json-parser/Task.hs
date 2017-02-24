@@ -5,6 +5,10 @@ module Task where
 import GHC.Generics
 import Data.Aeson
 
+-- Import utilities
+import Data.Ord
+import Data.List
+
 -- Import SubClasses
 import qualified User as U
 import qualified Milestone as M
@@ -34,3 +38,16 @@ data Task = Task            { id                  :: Int
 instance FromJSON Task
 instance Show Task where
     show x = show $ Task.id x
+
+sortTasks :: (Ord a) => [(Task -> a)] -> Tasks -> Tasks
+sortTasks fields ts = sortBy comparator ts
+    where
+        -- mconcat compareList 
+        compareList = map comparing fields
+        comparator = mconcat compareList
+
+filterTasks :: [(Task -> Bool)] -> Tasks -> Tasks
+filterTasks filters ts = filter globalFilter ts
+    where
+        globalFilter t = foldl (\acc f -> acc && f t) True filters
+
