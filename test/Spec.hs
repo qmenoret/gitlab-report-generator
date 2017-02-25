@@ -5,6 +5,7 @@ import Test.Hspec
 -- Ext libs
 import Data.Aeson
 import Data.List
+import Data.Ord
 
 -- My lib
 import Lib 
@@ -110,22 +111,34 @@ main = hspec $ do
             sortOn (M.title . T.milestone) tasks `shouldBe` [t4,t3,t2,t1]
 
         it "sort on several keys" $ do
-            T.sortTasks [T.title] tasks `shouldBe` [t4,t1,t3,t2]
-            T.sortTasks [ (M.title . T.milestone)
-                      , T.title
+            T.sortTasks [ (comparing T.title) ] tasks `shouldBe` [t4,t1,t3,t2]
+            T.sortTasks [ (comparing (M.title . T.milestone))
+                        , (comparing T.title)
+                    ] tasks `shouldBe` [t4,t3,t1,t2]
+
+        it "sort on several types" $ do
+            T.sortTasks [ (comparing (M.title . T.milestone))
+                        , (comparing T.id)
+                        , (comparing T.confidential)
                     ] tasks `shouldBe` [t4,t3,t1,t2]
 
         it "Filter tasks" $ do
             T.filterTasks [ (\t -> T.id t > 2) ] tasks `shouldBe` [t4,t3]
             T.filterTasks [ (\t -> T.id t > 1)
-                        , (\t -> (M.state . T.milestone) t == "active")
+                          , (\t -> (M.state . T.milestone) t == "active")
                 ] tasks `shouldBe` [t3,t2]
 
         it "Filter and sort chaining !" $ do
-            (T.sortTasks [T.title] . T.filterTasks [(\t -> (M.state . T.milestone) t == "active")]) tasks
+            (T.sortTasks [comparing T.title] . T.filterTasks [(\t -> (M.state . T.milestone) t == "active")]) tasks
                 `shouldBe` [t1,t3,t2]
 
-
+    describe "Use strings to filter and sort" $ do
+        let Just [t1,t2,t3,t4] = decode issues :: Maybe T.Tasks
+        let tasks = [t4,t3,t2,t1]
+        
+        it "sort on several keys" $ do
+            T.sortTasks (T.getComparators ["title"]) tasks `shouldBe` [t4,t1,t3,t2]
+            T.sortTasks (T.getComparators ["title", "milestone.title"]) tasks `shouldBe` [t4,t1,t3,t2]
 
 
 
