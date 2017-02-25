@@ -5,6 +5,9 @@ module User where
 import GHC.Generics
 import Data.Aeson
 
+-- Import Utililities
+import Data.Ord
+
 -- TODO
 -- data UserState = Active | Inactive
 --     deriving (Show, Generic)
@@ -21,3 +24,14 @@ data User = User            { name                  :: String
                             }
     deriving (Show, Eq, Ord, Generic)
 instance FromJSON User
+
+getComparators :: [String] -> [(User -> User -> Ordering)]
+getComparators = map getComparator
+
+getComparator :: String -> (User -> User -> Ordering)
+getComparator "name"        = comparing User.name
+getComparator "username"    = comparing User.username
+getComparator "id"          = comparing User.id
+getComparator "state"       = comparing User.state
+getComparator "avatar_url"  = comparing User.avatar_url
+getComparator "web_url"     = comparing User.web_url

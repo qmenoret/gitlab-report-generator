@@ -7,7 +7,6 @@ import Data.Aeson
 
 -- Import utilities
 import Data.Ord
-import Data.List
 
 -- Import SubClasses
 import qualified User as U
@@ -39,19 +38,8 @@ instance FromJSON Task
 instance Show Task where
     show x = show $ Task.id x
 
-sortTasks :: [(Task -> Task -> Ordering)] -> Tasks -> Tasks
-sortTasks fields ts = sortBy comparator ts
-    where
-        -- mconcat compareList 
-        comparator = mconcat fields
-
-filterTasks :: [(Task -> Bool)] -> Tasks -> Tasks
-filterTasks filters ts = filter globalFilter ts
-    where
-        globalFilter t = foldl (\acc f -> acc && f t) True filters
-
 getComparators :: [String] -> [(Task -> Task -> Ordering)]
-getComparators = foldl (\acc x -> (getComparator x) : acc) []
+getComparators = map getComparator
 
 getComparator :: String -> (Task -> Task -> Ordering)
 getComparator "id"                  = comparing Task.id
@@ -74,9 +62,10 @@ getComparator "due_date"            = comparing Task.due_date
 getComparator "confidential"        = comparing Task.confidential
 getComparator "web_url"             = comparing Task.web_url
 getComparator xs 
-    | m1 == "milestone" = comparing Task.milestone
-    | m1 == "assignee"  = comparing Task.assignee
-    | m1 == "author"    = comparing Task.author
+    | m1 == "milestone" = (\t1 t2 -> (M.getComparator m2)   (Task.milestone t1)   (Task.milestone t2))
+    | m1 == "author"    = (\t1 t2 -> (U.getComparator m2)   (Task.author t1)      (Task.author t2))
+    -- TODO (maybe)
+    -- | m1 == "assignee"  = (\t1 t2 -> (U.getComparator m2)   (Task.assignee t1)    (Task.assignee t2))
     where
-        (m1,m2) = span ('.' /=) xs
+        (m1,dot:m2) = span ('.' /=) xs
 

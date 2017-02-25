@@ -5,6 +5,9 @@ module Milestone where
 import GHC.Generics
 import Data.Aeson
 
+-- Import Utililities
+import Data.Ord
+
 type Milestones = [Milestone]
 data Milestone = Milestone { id                   :: Int
                            , iid                  :: Int
@@ -19,3 +22,18 @@ data Milestone = Milestone { id                   :: Int
                            }
     deriving (Show, Eq, Ord, Generic)
 instance FromJSON Milestone
+
+getComparators :: [String] -> [(Milestone -> Milestone -> Ordering)]
+getComparators = map getComparator
+
+getComparator :: String -> (Milestone -> Milestone -> Ordering)
+getComparator "id"              = comparing Milestone.id
+getComparator "iid"             = comparing Milestone.iid
+getComparator "project_id"      = comparing Milestone.project_id
+getComparator "title"           = comparing Milestone.title
+getComparator "description"     = comparing Milestone.description
+getComparator "state"           = comparing Milestone.state
+getComparator "created_at"      = comparing Milestone.created_at
+getComparator "updated_at"      = comparing Milestone.updated_at
+getComparator "due_date"        = comparing Milestone.due_date
+getComparator "start_date"      = comparing Milestone.start_date
