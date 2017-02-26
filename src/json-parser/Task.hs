@@ -7,6 +7,7 @@ import Data.Aeson
 
 -- Import utilities
 import Data.Ord
+import Data.Maybe
 
 -- Import SubClasses
 import qualified User as U
@@ -68,4 +69,21 @@ getComparator xs
     -- | m1 == "assignee"  = (\t1 t2 -> (U.getComparator m2)   (Task.assignee t1)    (Task.assignee t2))
     where
         (m1,dot:m2) = span ('.' /=) xs
+
+-- List of predefined filters
+isOpen :: Task -> Bool
+isOpen = (== "opened") . Task.state
+
+isClosed :: Task -> Bool
+isClosed = (== "closed") . Task.state
+
+isUnassigned :: Task -> Bool
+isUnassigned = isNothing . Task.assignee
+
+isAssigned :: Task -> Bool
+isAssigned = not . isUnassigned
+
+inActiveMilestone :: Task -> Bool
+inActiveMilestone = M.isActive . Task.milestone
+
 

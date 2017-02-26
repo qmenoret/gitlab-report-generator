@@ -37,3 +37,13 @@ getComparator "created_at"      = comparing Milestone.created_at
 getComparator "updated_at"      = comparing Milestone.updated_at
 getComparator "due_date"        = comparing Milestone.due_date
 getComparator "start_date"      = comparing Milestone.start_date
+
+
+-- List of predefined filters
+isActive :: Milestone -> Bool
+isActive = (== "active") . Milestone.state
+
+isInactive :: Milestone -> Bool
+isInactive = (== "inactive") . Milestone.state
+
+

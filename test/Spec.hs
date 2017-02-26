@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Test.Hspec
+import Control.Exception (evaluate)
 
 -- Ext libs
 import Data.Aeson
@@ -13,12 +14,14 @@ import Lib
 -- Import md generator
 import Markdown
 
--- Import JSON submodules
+-- Import Parsing submodules
 import ComplexList
 import qualified User as U
 import qualified Milestone as M
 import qualified Task as T
--- import qualified User
+
+-- Import Interactions
+import qualified Config as C
 
 main :: IO ()
 main = hspec $ do
@@ -142,6 +145,66 @@ main = hspec $ do
             complexSort (T.getComparators ["author.username"]) tasks `shouldBe` [t1,t4,t2,t3]
             complexSort (T.getComparators ["milestone.title","id"]) tasks `shouldBe` [t4,t3,t1,t2]
             complexSort (T.getComparators ["milestone.title", "title"]) tasks `shouldBe` [t4,t3,t1,t2]
+
+        it "filters" $ do
+            (complexSort (T.getComparators ["title"]) . complexFilter [T.isOpen]) tasks `shouldBe` [t4,t1,t3,t2]
+            (complexSort (T.getComparators ["title"]) . complexFilter [T.isAssigned, T.isOpen]) tasks `shouldBe` []
+
+    describe "Parse program arguments" $ do
+        it "Sweet default config" $ do
+            C.input C.defaultConfig     `shouldBe`  C.FromStdin
+            C.filters C.defaultConfig   `shouldBe`  []
+            C.sortKeys C.defaultConfig  `shouldBe`  ["title"]
+            
+        it "Update existing conf from args" $ do
+            C.parseArgs C.defaultConfig []                        `shouldBe` C.defaultConfig
+            C.parseArgs C.defaultConfig ["--input-file", "toto" ] `shouldBe` C.defaultConfig { C.input    = C.FromFile "toto" }
+            C.parseArgs C.defaultConfig ["--filters",    "f1,f2"] `shouldBe` C.defaultConfig { C.filters  = ["f1","f2"] }
+            C.parseArgs C.defaultConfig ["--sort-keys",  "s1,s2"] `shouldBe` C.defaultConfig { C.sortKeys = ["s1","s2"] }
+            C.parseArgs C.defaultConfig ["--sort-keys",  "s1,s2"
+                                        ,"--filters",    "f1,f2"
+                                        ,"--input-file", "toto" ] `shouldBe` C.defaultConfig { C.filters  = ["f1","f2"]
+                                                                                             , C.sortKeys = ["s1","s2"]
+                                                                                             , C.input    = C.FromFile "toto" }
+
+        it "Generate new conf from cmd args" $ do
+            C.fromArgs ["--input-file", "toto", "--filters", "myf,myotherf", "--sort-keys", "title"]
+                `shouldBe` C.defaultConfig  { C.filters  = ["myf","myotherf"]
+                                            , C.sortKeys = ["title"]
+                                            , C.input    = C.FromFile "toto" }
+            
+        it "Bad arg throws" $ do
+            evaluate (C.fromArgs ["idontexist"]) `shouldThrow` anyException
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
