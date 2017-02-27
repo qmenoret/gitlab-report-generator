@@ -7,6 +7,7 @@ import Control.Exception (evaluate)
 import Data.Aeson
 import Data.List
 import Data.Ord
+import Data.Maybe
 
 -- My lib
 import Lib 
@@ -51,7 +52,6 @@ main = hspec $ do
             M.start_date        m   `shouldBe`  Nothing
 
         it "try parsing task" $ do
-            let jsonTask = "{\"id\":1,\"iid\":49,\"project_id\":43,\"title\":\"Super-Issue-Name\",\"description\":\"issue description\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label1\",\"To Do\"],\"milestone\":{\"id\":1,\"iid\":2,\"project_id\":43,\"title\":\"v1.0\",\"description\":\"Hello world\",\"state\":\"active\",\"created_at\":\"2017-02-22T13:12:49.640+01:00\",\"updated_at\":\"2017-02-22T13:12:49.640+01:00\",\"due_date\":\"2017-04-07\",\"start_date\":null},\"assignee\":null,\"author\":{\"name\":\"James Bond\",\"username\":\"jbond\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"}"
             let Just t = decode jsonTask :: Maybe T.Task
             T.id                t   `shouldBe`  1
             T.iid               t   `shouldBe`  49
@@ -63,7 +63,7 @@ main = hspec $ do
             T.updated_at        t   `shouldBe`  "2017-02-23T10:24:02.492+01:00"
             T.labels            t   `shouldBe`  ["Label1","To Do"]
 
-            let m = T.milestone t
+            let Just m = T.milestone t
             M.id                m   `shouldBe`  1
             M.iid               m   `shouldBe`  2
             M.project_id        m   `shouldBe`  43
@@ -93,6 +93,10 @@ main = hspec $ do
             T.confidential      t   `shouldBe`  False
             T.web_url           t   `shouldBe`  "https://my-gitlab.com/Group/ProjectName/issues/1"
 
+        it "Milestone can be null" $ do
+            let Just t = decode issueAlone :: Maybe T.Task
+            T.milestone t `shouldBe` Nothing
+
         it "Try parsing list of tasks" $ do
             let Just tasks = decode issues :: Maybe T.Tasks
             length tasks `shouldBe` 4
@@ -112,16 +116,16 @@ main = hspec $ do
 
         it "sortOn works on one key (composed)" $ do
             sortOn T.title tasks `shouldBe` [t4,t1,t3,t2]
-            sortOn (M.title . T.milestone) tasks `shouldBe` [t4,t3,t2,t1]
+            sortOn (M.title . fromJust . T.milestone) tasks `shouldBe` [t4,t3,t2,t1]
 
         it "sort on several keys" $ do
             complexSort [ (comparing T.title) ] tasks `shouldBe` [t4,t1,t3,t2]
-            complexSort [ (comparing (M.title . T.milestone))
+            complexSort [ (comparing (M.title . fromJust . T.milestone))
                         , (comparing T.title)
                     ] tasks `shouldBe` [t4,t3,t1,t2]
 
         it "sort on several types" $ do
-            complexSort [ (comparing (M.title . T.milestone))
+            complexSort [ (comparing (M.title . fromJust . T.milestone))
                         , (comparing T.id)
                         , (comparing T.confidential)
                     ] tasks `shouldBe` [t4,t3,t1,t2]
@@ -129,11 +133,11 @@ main = hspec $ do
         it "Filter tasks" $ do
             complexFilter [ (\t -> T.id t > 2) ] tasks `shouldBe` [t4,t3]
             complexFilter [ (\t -> T.id t > 1)
-                          , (\t -> (M.state . T.milestone) t == "active")
+                          , (\t -> (M.state . fromJust . T.milestone) t == "active")
                 ] tasks `shouldBe` [t3,t2]
 
         it "Filter and sort chaining !" $ do
-            (complexSort [comparing T.title] . complexFilter [(\t -> (M.state . T.milestone) t == "active")]) tasks
+            (complexSort [comparing T.title] . complexFilter [(\t -> (M.state . fromJust . T.milestone) t == "active")]) tasks
                 `shouldBe` [t1,t3,t2]
 
     describe "Use strings to filter and sort" $ do
@@ -147,8 +151,8 @@ main = hspec $ do
             complexSort (T.getComparators ["milestone.title", "title"]) tasks `shouldBe` [t4,t3,t1,t2]
 
         it "filters" $ do
-            (complexSort (T.getComparators ["title"]) . complexFilter [T.isOpen]) tasks `shouldBe` [t4,t1,t3,t2]
-            (complexSort (T.getComparators ["title"]) . complexFilter [T.isAssigned, T.isOpen]) tasks `shouldBe` []
+            (complexSort (T.getComparators ["title"]) . complexFilter (T.getFilters ["open"])) tasks `shouldBe` [t4,t1,t3,t2]
+            (complexSort (T.getComparators ["title"]) . complexFilter (T.getFilters ["assigned", "open"])) tasks `shouldBe` []
 
     describe "Parse program arguments" $ do
         it "Sweet default config" $ do
@@ -214,5 +218,11 @@ main = hspec $ do
 -- DATA
 --
 --
+
+jsonTask = "{\"id\":1,\"iid\":49,\"project_id\":43,\"title\":\"Super-Issue-Name\",\"description\":\"issue description\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label1\",\"To Do\"],\"milestone\":{\"id\":1,\"iid\":2,\"project_id\":43,\"title\":\"v1.0\",\"description\":\"Hello world\",\"state\":\"active\",\"created_at\":\"2017-02-22T13:12:49.640+01:00\",\"updated_at\":\"2017-02-22T13:12:49.640+01:00\",\"due_date\":\"2017-04-07\",\"start_date\":null},\"assignee\":null,\"author\":{\"name\":\"James Bond\",\"username\":\"jbond\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"}"
+issueAlone = "{\"id\":1,\"iid\":49,\"project_id\":43,\"title\":\"Super-Issue-Name\",\"description\":\"issue description\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label1\",\"To Do\"],\"milestone\":null,\"assignee\":null,\"author\":{\"name\":\"James Bond\",\"username\":\"jbond\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"}"
+
+
+
 
 issues = "[{\"id\":1,\"iid\":49,\"project_id\":43,\"title\":\"Good-Issue-Name\",\"description\":\"issue description\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label1\",\"To Do\"],\"milestone\":{\"id\":1,\"iid\":2,\"project_id\":43,\"title\":\"v1.0\",\"description\":\"Hello world\",\"state\":\"active\",\"created_at\":\"2017-02-22T13:12:49.640+01:00\",\"updated_at\":\"2017-02-22T13:12:49.640+01:00\",\"due_date\":\"2017-04-07\",\"start_date\":null},\"assignee\":null,\"author\":{\"name\":\"James Bond\",\"username\":\"jbond\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"},{\"id\":2,\"iid\":50,\"project_id\":43,\"title\":\"Super-Issue-Name2\",\"description\":\"issue description T_T\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label3\",\"Doing\"],\"milestone\":{\"id\":1,\"iid\":2,\"project_id\":43,\"title\":\"v1.0\",\"description\":\"Hello world\",\"state\":\"active\",\"created_at\":\"2017-02-22T13:12:49.640+01:00\",\"updated_at\":\"2017-02-22T13:12:49.640+01:00\",\"due_date\":\"2017-04-14\",\"start_date\":null},\"assignee\":null,\"author\":{\"name\":\"Linus Torvald\",\"username\":\"ltorvald\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"},{\"id\":3,\"iid\":51,\"project_id\":43,\"title\":\"MyIssue\",\"description\":\"issue description\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label1\",\"To Do\"],\"milestone\":{\"id\":2,\"iid\":2,\"project_id\":43,\"title\":\"Beta\",\"description\":\"Hello world\",\"state\":\"active\",\"created_at\":\"2017-02-22T13:12:49.640+01:00\",\"updated_at\":\"2017-02-22T13:12:49.640+01:00\",\"due_date\":\"2017-04-07\",\"start_date\":null},\"assignee\":null,\"author\":{\"name\":\"Mama Mia\",\"username\":\"mmia\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"},{\"id\":4,\"iid\":52,\"project_id\":43,\"title\":\"A is first letter\",\"description\":\"issue description\",\"state\":\"opened\",\"created_at\":\"2017-02-23T10:23:32.218+01:00\",\"updated_at\":\"2017-02-23T10:24:02.492+01:00\",\"labels\":[\"Label1\",\"To Do\"],\"milestone\":{\"id\":3,\"iid\":2,\"project_id\":43,\"title\":\"Alpha\",\"description\":\"Hello world\",\"state\":\"inactive\",\"created_at\":\"2017-02-22T13:12:49.640+01:00\",\"updated_at\":\"2017-02-22T13:12:49.640+01:00\",\"due_date\":\"2017-04-07\",\"start_date\":null},\"assignee\":null,\"author\":{\"name\":\"Kevin Ata\",\"username\":\"kata\",\"id\":180,\"state\":\"active\",\"avatar_url\":\"https://my-gitlab.com/uploads/user/avatar/180/avatar.png\",\"web_url\":\"https://my-gitlab.com/jbond\"},\"subscribed\":false,\"user_notes_count\":0,\"upvotes\":0,\"downvotes\":0,\"due_date\":null,\"confidential\":false,\"web_url\":\"https://my-gitlab.com/Group/ProjectName/issues/1\"}]"

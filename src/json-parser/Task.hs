@@ -23,7 +23,7 @@ data Task = Task            { id                  :: Int
                             , created_at          :: String
                             , updated_at          :: String
                             , labels              :: [String]
-                            , milestone           :: M.Milestone
+                            , milestone           :: Maybe M.Milestone
                             , assignee            :: Maybe U.User
                             , subscribed          :: Bool
                             , user_notes_count    :: Int
@@ -63,12 +63,22 @@ getComparator "due_date"            = comparing Task.due_date
 getComparator "confidential"        = comparing Task.confidential
 getComparator "web_url"             = comparing Task.web_url
 getComparator xs 
-    | m1 == "milestone" = (\t1 t2 -> (M.getComparator m2)   (Task.milestone t1)   (Task.milestone t2))
+    -- FIXME Error on nothing
+    | m1 == "milestone" = (\t1 t2 -> (M.getComparator m2)   (fromJust (Task.milestone t1))   (fromJust (Task.milestone t2)))
     | m1 == "author"    = (\t1 t2 -> (U.getComparator m2)   (Task.author t1)      (Task.author t2))
     -- TODO (maybe)
     -- | m1 == "assignee"  = (\t1 t2 -> (U.getComparator m2)   (Task.assignee t1)    (Task.assignee t2))
     where
         (m1,dot:m2) = span ('.' /=) xs
+
+getFilters :: [String] -> [(Task -> Bool)]
+getFilters [] = []
+getFilters ("open":xs)          = isOpen                : getFilters xs
+getFilters ("closed":xs)        = isClosed              : getFilters xs
+getFilters ("assigned":xs)      = isAssigned            : getFilters xs
+getFilters ("unassigned":xs)    = isUnassigned          : getFilters xs
+getFilters ("active":xs)        = inActiveMilestone     : getFilters xs
+getFilters ("inactive":xs)      = inInactiveMilestone   : getFilters xs
 
 -- List of predefined filters
 isOpen :: Task -> Bool
@@ -77,13 +87,18 @@ isOpen = (== "opened") . Task.state
 isClosed :: Task -> Bool
 isClosed = (== "closed") . Task.state
 
-isUnassigned :: Task -> Bool
-isUnassigned = isNothing . Task.assignee
-
 isAssigned :: Task -> Bool
 isAssigned = not . isUnassigned
 
+isUnassigned :: Task -> Bool
+isUnassigned = isNothing . Task.assignee
+
 inActiveMilestone :: Task -> Bool
-inActiveMilestone = M.isActive . Task.milestone
+inActiveMilestone Task{milestone=Nothing} = False
+inActiveMilestone t = (M.isActive . fromJust . Task.milestone) t
+
+inInactiveMilestone :: Task -> Bool
+inInactiveMilestone Task{milestone=Nothing} = True
+inInactiveMilestone t = (M.isInactive . fromJust . Task.milestone) t
 
 

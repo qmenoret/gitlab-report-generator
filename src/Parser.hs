@@ -16,6 +16,11 @@ doSort c = complexSort comparators
     where 
         comparators = T.getComparators (C.sortKeys c)
 
+doFilter :: C.ParserConfig -> T.Tasks -> T.Tasks
+doFilter c = complexFilter filters
+    where 
+        filters = T.getFilters (C.filters c)
+
 parseTasks :: C.ParserConfig -> IO(T.Tasks)
 parseTasks c = do
     issues <- readTasks c
@@ -30,5 +35,5 @@ doParse :: [String] -> IO(String)
 doParse argv = do
     let conf = C.fromArgs argv
     ts <- parseTasks conf
-    let sts = doSort conf ts
+    let sts = (doSort conf . doFilter conf) ts
     return (show sts)
