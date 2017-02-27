@@ -3,7 +3,7 @@ module Main where
 import Lib
 
 main :: IO ()
-main = someFunc
+main = parserEntry
 
 someFunc :: IO ()
 someFunc =  putStrLn "toto"

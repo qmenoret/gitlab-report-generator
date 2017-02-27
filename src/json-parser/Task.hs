@@ -37,7 +37,7 @@ data Task = Task            { id                  :: Int
     deriving (Eq, Ord, Generic)
 instance FromJSON Task
 instance Show Task where
-    show x = show $ Task.id x
+    show x = show $ Task.title x
 
 getComparators :: [String] -> [(Task -> Task -> Ordering)]
 getComparators = map getComparator

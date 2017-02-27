@@ -1,12 +1,16 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 module Lib
-    ( 
+    ( parserEntry
     ) where
 
--- Import JSON utils
-import Data.Aeson
-import qualified Data.ByteString.Lazy as BS
+import System.Environment   
 
 -- Import SubClasses
 import qualified Task as T
+import qualified Parser as P
 
+parserEntry :: IO()
+parserEntry = do
+    argv <- getArgs
+    tasks <- P.doParse argv
+    putStrLn tasks

@@ -22,7 +22,8 @@ library
                      , Task
                      , Markdown
                      , ComplexList
-                     , Config
+                     , ParserConfig
+                     , Parser
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , split

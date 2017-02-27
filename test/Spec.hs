@@ -21,7 +21,7 @@ import qualified Milestone as M
 import qualified Task as T
 
 -- Import Interactions
-import qualified Config as C
+import qualified ParserConfig as C
 
 main :: IO ()
 main = hspec $ do
@@ -152,24 +152,24 @@ main = hspec $ do
 
     describe "Parse program arguments" $ do
         it "Sweet default config" $ do
-            C.input C.defaultConfig     `shouldBe`  C.FromStdin
-            C.filters C.defaultConfig   `shouldBe`  []
-            C.sortKeys C.defaultConfig  `shouldBe`  ["title"]
+            C.input C.defaultParserConfig     `shouldBe`  C.FromStdin
+            C.filters C.defaultParserConfig   `shouldBe`  []
+            C.sortKeys C.defaultParserConfig  `shouldBe`  ["title"]
             
         it "Update existing conf from args" $ do
-            C.parseArgs C.defaultConfig []                        `shouldBe` C.defaultConfig
-            C.parseArgs C.defaultConfig ["--input-file", "toto" ] `shouldBe` C.defaultConfig { C.input    = C.FromFile "toto" }
-            C.parseArgs C.defaultConfig ["--filters",    "f1,f2"] `shouldBe` C.defaultConfig { C.filters  = ["f1","f2"] }
-            C.parseArgs C.defaultConfig ["--sort-keys",  "s1,s2"] `shouldBe` C.defaultConfig { C.sortKeys = ["s1","s2"] }
-            C.parseArgs C.defaultConfig ["--sort-keys",  "s1,s2"
+            C.parseArgs C.defaultParserConfig []                        `shouldBe` C.defaultParserConfig
+            C.parseArgs C.defaultParserConfig ["--input-file", "toto" ] `shouldBe` C.defaultParserConfig { C.input    = C.FromFile "toto" }
+            C.parseArgs C.defaultParserConfig ["--filters",    "f1,f2"] `shouldBe` C.defaultParserConfig { C.filters  = ["f1","f2"] }
+            C.parseArgs C.defaultParserConfig ["--sort-keys",  "s1,s2"] `shouldBe` C.defaultParserConfig { C.sortKeys = ["s1","s2"] }
+            C.parseArgs C.defaultParserConfig ["--sort-keys",  "s1,s2"
                                         ,"--filters",    "f1,f2"
-                                        ,"--input-file", "toto" ] `shouldBe` C.defaultConfig { C.filters  = ["f1","f2"]
+                                        ,"--input-file", "toto" ] `shouldBe` C.defaultParserConfig { C.filters  = ["f1","f2"]
                                                                                              , C.sortKeys = ["s1","s2"]
                                                                                              , C.input    = C.FromFile "toto" }
 
         it "Generate new conf from cmd args" $ do
             C.fromArgs ["--input-file", "toto", "--filters", "myf,myotherf", "--sort-keys", "title"]
-                `shouldBe` C.defaultConfig  { C.filters  = ["myf","myotherf"]
+                `shouldBe` C.defaultParserConfig  { C.filters  = ["myf","myotherf"]
                                             , C.sortKeys = ["title"]
                                             , C.input    = C.FromFile "toto" }
             
