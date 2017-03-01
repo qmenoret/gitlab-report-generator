@@ -43,6 +43,7 @@ getComparators :: [String] -> [(Task -> Task -> Ordering)]
 getComparators = map getComparator
 
 getComparator :: String -> (Task -> Task -> Ordering)
+getComparator ('#':xs)              = flip $ getComparator xs
 getComparator "id"                  = comparing Task.id
 getComparator "iid"                 = comparing Task.iid
 getComparator "project_id"          = comparing Task.project_id

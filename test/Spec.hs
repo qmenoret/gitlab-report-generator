@@ -148,7 +148,13 @@ main = hspec $ do
             complexSort (T.getComparators ["title"]) tasks `shouldBe` [t4,t1,t3,t2]
             complexSort (T.getComparators ["author.username"]) tasks `shouldBe` [t1,t4,t2,t3]
             complexSort (T.getComparators ["milestone.title","id"]) tasks `shouldBe` [t4,t3,t1,t2]
-            complexSort (T.getComparators ["milestone.title", "title"]) tasks `shouldBe` [t4,t3,t1,t2]
+            complexSort (T.getComparators ["milestone.title","title"]) tasks `shouldBe` [t4,t3,t1,t2]
+        
+        it "reverse sort on several keys" $ do
+            complexSort (T.getComparators ["#title"]) tasks `shouldBe` reverse [t4,t1,t3,t2]
+            complexSort (T.getComparators ["#author.username"]) tasks `shouldBe` reverse [t1,t4,t2,t3]
+            complexSort (T.getComparators ["#milestone.title","#id"]) tasks `shouldBe` reverse [t4,t3,t1,t2]
+            complexSort (T.getComparators ["#milestone.title","#title"]) tasks `shouldBe` reverse [t4,t3,t1,t2]
 
         it "filters" $ do
             (complexSort (T.getComparators ["title"]) . complexFilter (T.getFilters ["open"])) tasks `shouldBe` [t4,t1,t3,t2]

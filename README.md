@@ -28,7 +28,8 @@ Arguments:
 You can sort the output by providing the keys on which you want the output to be sorted. You can specify several keys, which will be used in order. Keys are provided as a comma separated list of strings.
 
 Example:
-* "assignee.username,title" -> Will sort by assignee, and display in alphabetical order.
+* "assignee.username,title"  -> Will sort by assignee, and display in alphabetical order.
+* "assignee.username,#title" -> Will sort by assignee, and display in reverse alphabetical order.
 
 ### Filters
 You can apply filters on the issue list using the argument `--filters`.
