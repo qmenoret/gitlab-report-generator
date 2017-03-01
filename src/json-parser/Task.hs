@@ -69,15 +69,6 @@ getComparator xs
     where
         (m1,dot:m2) = span ('.' /=) xs
 
-getFilters :: [String] -> [(Task -> Bool)]
-getFilters [] = []
-getFilters ("open":xs)          = isOpen                : getFilters xs
-getFilters ("closed":xs)        = isClosed              : getFilters xs
-getFilters ("assigned":xs)      = isAssigned            : getFilters xs
-getFilters ("unassigned":xs)    = isUnassigned          : getFilters xs
-getFilters ("active":xs)        = inActiveMilestone     : getFilters xs
-getFilters ("inactive":xs)      = inInactiveMilestone   : getFilters xs
-
 getColumnValue :: String -> Task -> String
 getColumnValue "id"                  = show . Task.id
 getColumnValue "iid"                 = show . Task.iid
@@ -104,6 +95,24 @@ getColumnValue xs
     | m1 == "assignee"  = U.getColumnValueMaybe m2 . Task.assignee
     where
         (m1,dot:m2) = span ('.' /=) xs
+
+-- Filters
+getFilters :: [String] -> [(Task -> Bool)]
+getFilters = map getFilter
+
+getFilter :: String -> (Task -> Bool)
+getFilter "open"          = isOpen
+getFilter "closed"        = isClosed
+getFilter "assigned"      = isAssigned
+getFilter "unassigned"    = isUnassigned
+getFilter "active"        = inActiveMilestone
+getFilter "inactive"      = inInactiveMilestone
+getFilter xs | '=' `elem` xs = (== e2) . getColumnValue e1
+             | '/' `elem` xs = (/= e2) . getColumnValue e1
+             | '>' `elem` xs = (>  e2) . getColumnValue e1
+             | '<' `elem` xs = (<  e2) . getColumnValue e1
+    where
+        (e1,op:e2) = span (`notElem` ['/','=','>','<']) xs 
 
 -- List of predefined filters
 isOpen :: Task -> Bool
