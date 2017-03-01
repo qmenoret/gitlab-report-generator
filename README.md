@@ -32,7 +32,7 @@ Example:
 * "assignee.username,#title" -> Will sort by assignee, and display in reverse alphabetical order.
 
 ### Filters
-You can apply filters on the issue list using the argument `--filters`.
+You can apply filters on the issue list using the argument `--filters`. You can specify several filters as a comma separated list.
 The default is "".
 
 #### Predefined
