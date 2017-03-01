@@ -49,9 +49,9 @@ getColumnValueMaybe _ Nothing = ""
 getColumnValueMaybe s (Just u) = getColumnValue s u
 
 getColumnValue :: String -> User -> String
-getColumnValue "name"        = show . User.name
-getColumnValue "username"    = show . User.username
+getColumnValue "name"        = User.name
+getColumnValue "username"    = User.username
 getColumnValue "id"          = show . User.id
-getColumnValue "state"       = show . User.state
-getColumnValue "avatar_url"  = show . User.avatar_url
-getColumnValue "web_url"     = show . User.web_url
+getColumnValue "state"       = User.state
+getColumnValue "avatar_url"  = User.avatar_url
+getColumnValue "web_url"     = User.web_url

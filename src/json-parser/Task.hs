@@ -82,11 +82,11 @@ getColumnValue :: String -> Task -> String
 getColumnValue "id"                  = show . Task.id
 getColumnValue "iid"                 = show . Task.iid
 getColumnValue "project_id"          = show . Task.project_id
-getColumnValue "title"               = show . Task.title
+getColumnValue "title"               = Task.title
 getColumnValue "description"         = show . Task.description
-getColumnValue "state"               = show . Task.state
-getColumnValue "created_at"          = show . Task.created_at
-getColumnValue "updated_at"          = show . Task.updated_at
+getColumnValue "state"               = Task.state
+getColumnValue "created_at"          = Task.created_at
+getColumnValue "updated_at"          = Task.updated_at
 getColumnValue "labels"              = show . Task.labels
 getColumnValue "milestone"           = show . Task.milestone
 getColumnValue "assignee"            = show . Task.assignee
@@ -97,7 +97,7 @@ getColumnValue "upvotes"             = show . Task.upvotes
 getColumnValue "downvotes"           = show . Task.downvotes
 getColumnValue "due_date"            = show . Task.due_date
 getColumnValue "confidential"        = show . Task.confidential
-getColumnValue "web_url"             = show . Task.web_url
+getColumnValue "web_url"             = Task.web_url
 getColumnValue xs 
     | m1 == "author"    = U.getColumnValue m2 . Task.author
     | m1 == "milestone" = M.getColumnValueMaybe m2 . Task.milestone
