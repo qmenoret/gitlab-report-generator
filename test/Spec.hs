@@ -103,8 +103,8 @@ main = hspec $ do
 
     describe "Try generate md" $ do
         it "Generate table of strings" $ do
-            table ["a", "b"] [["","Long one"],["String","Yep"]] `shouldBe` "|a|b|\n|---|---|\n||Long one|\n|String|Yep|\n"
-            table ["a", "b", "loooong header"] [["",show True,show 3],["String",show False,show (-4)]] `shouldBe` "|a|b|loooong header|\n|---|---|---|\n||True|3|\n|String|False|-4|\n"
+            table [["a", "b"],["","Long one"],["String","Yep"]] `shouldBe` "|a|b|\n|---|---|\n||Long one|\n|String|Yep|\n"
+            table [["a", "b", "loooong header"],["",show True,show 3],["String",show False,show (-4)]] `shouldBe` "|a|b|loooong header|\n|---|---|---|\n||True|3|\n|String|False|-4|\n"
 
 
     describe "Sort and filter tasks" $ do

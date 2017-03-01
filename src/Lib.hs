@@ -8,9 +8,10 @@ import System.Environment
 -- Import SubClasses
 import qualified Task as T
 import qualified Parser as P
+import Markdown
 
 parserEntry :: IO()
 parserEntry = do
     argv <- getArgs
-    tasks <- P.doParse argv
-    putStrLn tasks
+    lines <- P.doParse argv
+    putStrLn $ table lines

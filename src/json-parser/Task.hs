@@ -80,6 +80,35 @@ getFilters ("unassigned":xs)    = isUnassigned          : getFilters xs
 getFilters ("active":xs)        = inActiveMilestone     : getFilters xs
 getFilters ("inactive":xs)      = inInactiveMilestone   : getFilters xs
 
+getColumnValue :: String -> Task -> String
+getColumnValue "id"                  = show . Task.id
+getColumnValue "iid"                 = show . Task.iid
+getColumnValue "project_id"          = show . Task.project_id
+getColumnValue "title"               = show . Task.title
+getColumnValue "description"         = show . Task.description
+getColumnValue "state"               = show . Task.state
+getColumnValue "created_at"          = show . Task.created_at
+getColumnValue "updated_at"          = show . Task.updated_at
+getColumnValue "labels"              = show . Task.labels
+getColumnValue "milestone"           = show . Task.milestone
+getColumnValue "assignee"            = show . Task.assignee
+getColumnValue "subscribed"          = show . Task.subscribed
+getColumnValue "user_notes_count"    = show . Task.user_notes_count
+getColumnValue "author"              = show . Task.author
+getColumnValue "upvotes"             = show . Task.upvotes
+getColumnValue "downvotes"           = show . Task.downvotes
+getColumnValue "due_date"            = show . Task.due_date
+getColumnValue "confidential"        = show . Task.confidential
+getColumnValue "web_url"             = show . Task.web_url
+-- getColumnValue xs 
+   -- | m1 == "milestone" = (\t1 t2 -> (M.getComparator m2)   (fromJust (Task.milestone t1))   (fromJust (Task.milestone t2)))
+    -- TODO (maybe)
+    -- | m1 == "author"    = (\t1 t2 -> (U.getComparator m2)   (Task.author t1)      (Task.author t2))
+    -- | m1 == "assignee"  = (\t1 t2 -> (U.getComparator m2)   (Task.assignee t1)    (Task.assignee t2))
+    -- where
+    --     (m1,dot:m2) = span ('.' /=) xs
+
+
 -- List of predefined filters
 isOpen :: Task -> Bool
 isOpen = (== "opened") . Task.state

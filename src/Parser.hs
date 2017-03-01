@@ -31,9 +31,15 @@ readTasks :: C.ParserConfig -> IO(BS.ByteString)
 readTasks C.ParserConfig {C.input=C.FromStdin} = BS.getContents
 readTasks C.ParserConfig {C.input=C.FromFile fileName} = BS.readFile fileName
 
-doParse :: [String] -> IO(String)
+getTable :: C.ParserConfig -> T.Tasks -> [[String]]
+getTable C.ParserConfig{C.columns=headers} ts = (headers : lines)
+    where
+        lines = map createLine ts
+        createLine t = map ((flip T.getColumnValue) t) headers 
+
+doParse :: [String] -> IO([[String]])
 doParse argv = do
     let conf = C.fromArgs argv
     ts <- parseTasks conf
     let sts = (doSort conf . doFilter conf) ts
-    return (show sts)
+    return $ getTable conf sts
