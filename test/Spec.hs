@@ -44,7 +44,7 @@ main = hspec $ do
             M.iid               m   `shouldBe`  2
             M.project_id        m   `shouldBe`  43 
             M.title             m   `shouldBe`  "v1.0"
-            M.description       m   `shouldBe`  "Hello world"
+            M.description       m   `shouldBe`  Just "Hello world"
             M.state             m   `shouldBe`  "active"
             M.created_at        m   `shouldBe`  "2017-02-22T13:12:49.640+01:00"
             M.updated_at        m   `shouldBe`  "2017-02-22T13:12:49.640+01:00"
@@ -57,7 +57,7 @@ main = hspec $ do
             T.iid               t   `shouldBe`  49
             T.project_id        t   `shouldBe`  43
             T.title             t   `shouldBe`  "Super-Issue-Name"
-            T.description       t   `shouldBe`  "issue description"
+            T.description       t   `shouldBe`  Just "issue description"
             T.state             t   `shouldBe`  "opened"
             T.created_at        t   `shouldBe`  "2017-02-23T10:23:32.218+01:00"
             T.updated_at        t   `shouldBe`  "2017-02-23T10:24:02.492+01:00"
@@ -68,7 +68,7 @@ main = hspec $ do
             M.iid               m   `shouldBe`  2
             M.project_id        m   `shouldBe`  43
             M.title             m   `shouldBe`  "v1.0"
-            M.description       m   `shouldBe`  "Hello world"
+            M.description       m   `shouldBe`  Just "Hello world"
             M.state             m   `shouldBe`  "active"
             M.created_at        m   `shouldBe`  "2017-02-22T13:12:49.640+01:00"
             M.updated_at        m   `shouldBe`  "2017-02-22T13:12:49.640+01:00"

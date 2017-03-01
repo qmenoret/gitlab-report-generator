@@ -25,8 +25,15 @@ data User = User            { name                  :: String
     deriving (Show, Eq, Ord, Generic)
 instance FromJSON User
 
+-- COMPARATORS
 getComparators :: [String] -> [(User -> User -> Ordering)]
 getComparators = map getComparator
+
+getMaybeComparator :: String -> Maybe User -> Maybe User -> Ordering
+getMaybeComparator _ Nothing Nothing        = EQ
+getMaybeComparator _ Nothing _              = LT
+getMaybeComparator _ _ Nothing              = GT
+getMaybeComparator s (Just u1) (Just u2)    = getComparator s u1 u2
 
 getComparator :: String -> (User -> User -> Ordering)
 getComparator "name"        = comparing User.name
@@ -35,3 +42,16 @@ getComparator "id"          = comparing User.id
 getComparator "state"       = comparing User.state
 getComparator "avatar_url"  = comparing User.avatar_url
 getComparator "web_url"     = comparing User.web_url
+
+-- VALUES
+getColumnValueMaybe :: String -> Maybe User -> String 
+getColumnValueMaybe _ Nothing = ""
+getColumnValueMaybe s (Just u) = getColumnValue s u
+
+getColumnValue :: String -> User -> String
+getColumnValue "name"        = show . User.name
+getColumnValue "username"    = show . User.username
+getColumnValue "id"          = show . User.id
+getColumnValue "state"       = show . User.state
+getColumnValue "avatar_url"  = show . User.avatar_url
+getColumnValue "web_url"     = show . User.web_url

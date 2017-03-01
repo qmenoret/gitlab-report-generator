@@ -13,7 +13,7 @@ data Milestone = Milestone { id                   :: Int
                            , iid                  :: Int
                            , project_id           :: Int
                            , title                :: String
-                           , description          :: String
+                           , description          :: Maybe String
                            , state                :: String
                            , created_at           :: String
                            , updated_at           :: String
@@ -23,8 +23,9 @@ data Milestone = Milestone { id                   :: Int
     deriving (Show, Eq, Ord, Generic)
 instance FromJSON Milestone
 
-getComparators :: [String] -> [(Milestone -> Milestone -> Ordering)]
-getComparators = map getComparator
+-- COMPARATORS
+getComparators :: [String] -> [(Maybe Milestone -> Maybe Milestone -> Ordering)]
+getComparators = map getMaybeComparator
 
 getComparator :: String -> (Milestone -> Milestone -> Ordering)
 getComparator "id"              = comparing Milestone.id
@@ -38,8 +39,30 @@ getComparator "updated_at"      = comparing Milestone.updated_at
 getComparator "due_date"        = comparing Milestone.due_date
 getComparator "start_date"      = comparing Milestone.start_date
 
+getMaybeComparator :: String -> Maybe Milestone -> Maybe Milestone -> Ordering
+getMaybeComparator _ Nothing Nothing        = EQ
+getMaybeComparator _ Nothing _              = LT
+getMaybeComparator _ _ Nothing              = GT
+getMaybeComparator s (Just m1) (Just m2)    = getComparator s m1 m2
 
--- List of predefined filters
+-- VALUES
+getColumnValueMaybe :: String -> Maybe Milestone -> String 
+getColumnValueMaybe _ Nothing = ""
+getColumnValueMaybe s (Just m) = getColumnValue s m
+
+getColumnValue :: String -> Milestone -> String
+getColumnValue "id"            = show . Milestone.id
+getColumnValue "iid"           = show . Milestone.iid
+getColumnValue "project_id"    = show . Milestone.project_id
+getColumnValue "title"         = show . Milestone.title
+getColumnValue "description"   = show . Milestone.description
+getColumnValue "state"         = show . Milestone.state
+getColumnValue "created_at"    = show . Milestone.created_at
+getColumnValue "updated_at"    = show . Milestone.updated_at
+getColumnValue "due_date"      = show . Milestone.due_date
+getColumnValue "start_date"    = show . Milestone.start_date
+
+-- Filters
 isActive :: Milestone -> Bool
 isActive = (== "active") . Milestone.state
 
