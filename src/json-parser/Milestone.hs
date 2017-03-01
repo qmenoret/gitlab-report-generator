@@ -55,12 +55,12 @@ getColumnValue "id"            = show . Milestone.id
 getColumnValue "iid"           = show . Milestone.iid
 getColumnValue "project_id"    = show . Milestone.project_id
 getColumnValue "title"         = Milestone.title
-getColumnValue "description"   = show . Milestone.description
+getColumnValue "description"   = showMaybeString . Milestone.description
 getColumnValue "state"         = Milestone.state
 getColumnValue "created_at"    = Milestone.created_at
 getColumnValue "updated_at"    = Milestone.updated_at
-getColumnValue "due_date"      = show . Milestone.due_date
-getColumnValue "start_date"    = show . Milestone.start_date
+getColumnValue "due_date"      = showMaybeString . Milestone.due_date
+getColumnValue "start_date"    = showMaybeString . Milestone.start_date
 
 -- Filters
 isActive :: Milestone -> Bool
@@ -69,4 +69,7 @@ isActive = (== "active") . Milestone.state
 isInactive :: Milestone -> Bool
 isInactive = (== "inactive") . Milestone.state
 
-
+-- Utils
+showMaybeString :: Maybe String -> String
+showMaybeString Nothing = ""
+showMaybeString (Just x) = x

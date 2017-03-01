@@ -83,13 +83,13 @@ getColumnValue "id"                  = show . Task.id
 getColumnValue "iid"                 = show . Task.iid
 getColumnValue "project_id"          = show . Task.project_id
 getColumnValue "title"               = Task.title
-getColumnValue "description"         = show . Task.description
+getColumnValue "description"         = showMaybeString . Task.description
 getColumnValue "state"               = Task.state
 getColumnValue "created_at"          = Task.created_at
 getColumnValue "updated_at"          = Task.updated_at
 getColumnValue "labels"              = show . Task.labels
-getColumnValue "milestone"           = show . Task.milestone
-getColumnValue "assignee"            = show . Task.assignee
+getColumnValue "milestone"           = showMaybe . Task.milestone
+getColumnValue "assignee"            = showMaybe . Task.assignee
 getColumnValue "subscribed"          = show . Task.subscribed
 getColumnValue "user_notes_count"    = show . Task.user_notes_count
 getColumnValue "author"              = show . Task.author
@@ -104,7 +104,6 @@ getColumnValue xs
     | m1 == "assignee"  = U.getColumnValueMaybe m2 . Task.assignee
     where
         (m1,dot:m2) = span ('.' /=) xs
-
 
 -- List of predefined filters
 isOpen :: Task -> Bool
@@ -127,4 +126,11 @@ inInactiveMilestone :: Task -> Bool
 inInactiveMilestone Task{milestone=Nothing} = True
 inInactiveMilestone t = (M.isInactive . fromJust . Task.milestone) t
 
+-- Utils
+showMaybe :: (Show a) => Maybe a -> String
+showMaybe Nothing = ""
+showMaybe (Just x) = show x
 
+showMaybeString :: Maybe String -> String
+showMaybeString Nothing = ""
+showMaybeString (Just x) = x
