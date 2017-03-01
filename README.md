@@ -52,9 +52,10 @@ Examples:
 * "id>4"                    --> Return all issues where id >  4
 * "id=4"                    --> Return all issues where id == 4
 * "id<4"                    --> Return all issues where id <  4
-* "id/4"                    --> Return all issues where id =! 4
+* "id~4"                    --> Return all issues where id =! 4
 * "id>4,id<10"              --> Return all issues where id >  4 and id < 10
-* "description/"            --> Return all issues with empty description
+* "#id>4"                   --> Return all issues where not (id >  4)
+* "description~"            --> Return all issues with empty description
 * "assignee.username=jbond" --> Return all issues assigned to jbond
 * "milestone=Nothing"       --> Return all issues not linked to a milestone
 

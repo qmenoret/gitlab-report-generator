@@ -157,12 +157,15 @@ main = hspec $ do
         it "generate dynamic filter" $ do
             complexFilter (T.getFilters ["state=opened"])   tasks `shouldBe`    [t4,t3,t2,t1]
             complexFilter (T.getFilters ["state=closed"])   tasks `shouldBe`    []
-            complexFilter (T.getFilters ["state/closed"])   tasks `shouldBe`    [t4,t3,t2,t1]
-            complexFilter (T.getFilters ["assignee/"])      tasks `shouldBe`    []
+            complexFilter (T.getFilters ["state~closed"])   tasks `shouldBe`    [t4,t3,t2,t1]
+            complexFilter (T.getFilters ["assignee~"])      tasks `shouldBe`    []
             complexFilter (T.getFilters ["id>2"])           tasks `shouldBe`    [t4,t3]
 
         it "generate dynamic filter on subclass" $ do
             complexFilter (T.getFilters ["milestone.state=active"])   tasks `shouldBe` [t3,t2,t1]
+
+        it "generate reverse dynamic filter" $ do
+            complexFilter (T.getFilters ["#id>2"])           tasks `shouldBe`    [t2,t1]
 
     describe "Parse program arguments" $ do
         it "Sweet default config" $ do

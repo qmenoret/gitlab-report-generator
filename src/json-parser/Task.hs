@@ -101,6 +101,7 @@ getFilters :: [String] -> [(Task -> Bool)]
 getFilters = map getFilter
 
 getFilter :: String -> (Task -> Bool)
+getFilter ('#':xs)        = (not) . (getFilter xs)
 getFilter "open"          = isOpen
 getFilter "closed"        = isClosed
 getFilter "assigned"      = isAssigned
@@ -108,11 +109,11 @@ getFilter "unassigned"    = isUnassigned
 getFilter "active"        = inActiveMilestone
 getFilter "inactive"      = inInactiveMilestone
 getFilter xs | '=' `elem` xs = (== e2) . getColumnValue e1
-             | '/' `elem` xs = (/= e2) . getColumnValue e1
+             | '~' `elem` xs = (/= e2) . getColumnValue e1
              | '>' `elem` xs = (>  e2) . getColumnValue e1
              | '<' `elem` xs = (<  e2) . getColumnValue e1
     where
-        (e1,op:e2) = span (`notElem` ['/','=','>','<']) xs 
+        (e1,op:e2) = span (`notElem` ['~','=','>','<']) xs 
 
 -- List of predefined filters
 isOpen :: Task -> Bool
